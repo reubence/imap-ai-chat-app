@@ -1,7 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextRequest, NextResponse } from "next/server";
 
-const DEFAULT_LOGIN_REDIRECT = "/";
+const DEFAULT_LOGIN_REDIRECT = "/login";
 const authRoutes = ["/login", "/signup"];
 const apiAuthPrefix = "/api/auth";
 
