@@ -10,7 +10,7 @@ export const signUp = async({email, password}: any) => {
             body: {
                 email, 
                 password,
-                name: email.split("@"),
+                name: email.split("@")[0],
             }
         })
     } catch (e: any){
