@@ -39,9 +39,6 @@ export default function Chat() {
           placeholder="Say something..."
           className='fixed bg-zinc-100 bottom-0 left-0 right-0 w-full max-w-md p-2 mb-8 mx-auto rounded-lg border border-zinc-300 shadow-xl'
         />
-        <button type="submit" disabled={status !== 'ready'}>
-          Submit
-        </button>
       </form>
     </div>
   );
