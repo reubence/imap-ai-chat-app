@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import {
   Conversation,
   ConversationContent,
@@ -37,8 +37,8 @@ import {
   usePromptInputAttachments,
 } from '@/components/ai-elements/prompt-input';
 
-export default function Chat() {
-  const { messages, sendMessage, status } = useChat({
+export default function Chat({ params }: { params: { chatId: string } }) {
+  const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
@@ -46,6 +46,31 @@ export default function Chat() {
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [text, setText] = useState<string>('');
+
+
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      try {
+        const response = await fetch(`/api/chat/${params.chatId}`);
+        if (response.ok) {
+          const previousMessages = await response.json();
+          console.log(previousMessages);
+          const formattedMessages = previousMessages.map((msg: any) => ({
+            id: msg.id,
+            role: msg.role,
+            parts: [{ type: 'text', text: msg.content }],
+          }));
+          setMessages(formattedMessages);
+        }
+      } catch (error) {
+        console.error('Failed to fetch chat history', error);
+      }
+    };
+
+    if (params.chatId) {
+      fetchChatHistory();
+    }
+  }, [params.chatId, setMessages]);
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);

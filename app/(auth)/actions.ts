@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 export const signUp = async({email, password}: any) => {
     try{
         await auth.api.signUpEmail({
+            headers: await headers(),
             body: {
                 email, 
                 password,
@@ -17,12 +18,14 @@ export const signUp = async({email, password}: any) => {
         console.error(`Error signing up : ${e}`);
         throw new Error("Error signing up");
     }
+    redirect("/");
 };
 
 export const signIn = async({email, password}: any) => {
     
     try{
         await auth.api.signInEmail({
+            headers: await headers(),
             body: {
                 email, 
                 password,
@@ -32,6 +35,7 @@ export const signIn = async({email, password}: any) => {
         console.error(`Error signing in : ${e}`);
         throw new Error("Error signing in");
     }
+    redirect("/");
 };
 
 export const signOut = async() => {
