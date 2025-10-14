@@ -2,15 +2,40 @@
 
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
-import { MessageSquare } from 'lucide-react';
+import { GlobeIcon, MessageSquare } from 'lucide-react';
 import { Message, MessageContent } from '@/components/ai-elements/message';
+import {
+  PromptInput,
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuItem,
+  PromptInputActionMenuTrigger,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputBody,
+  PromptInputButton,
+  PromptInputMessage,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem,
+  PromptInputModelSelectTrigger,
+  PromptInputModelSelectValue,
+  PromptInputProvider,
+  PromptInputSpeechButton,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputToolbar,
+  PromptInputTools,
+  usePromptInputAttachments,
+} from '@/components/ai-elements/prompt-input';
 
 export default function Chat() {
   const { messages, sendMessage, status } = useChat({
@@ -18,12 +43,32 @@ export default function Chat() {
       api: '/api/chat',
     }),
   });
-  const [input, setInput] = useState('');
+  
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = useState<string>('');
+
+  const handleSubmit = (message: PromptInputMessage) => {
+    const hasText = Boolean(message.text);
+    const hasAttachments = Boolean(message.files?.length);
+
+    if (!(hasText || hasAttachments)) {
+      return;
+    }
+
+    sendMessage(
+      { 
+        text: message.text || 'Sent with attachments',
+        files: message.files 
+      },
+    );
+    setText('');
+  };
+
 
   console.log(messages);
   
   return (
-    <div className='flex flex-col w-full max-w-md py-24 mx-auto stretch'>
+    <div className='h-screen flex flex-col w-full max-w-md py-24 mx-auto stretch'>
       <Conversation className="relative w-full" style={{ height: '500px' }}>
         <ConversationContent>
           {messages.length === 0 ? (
@@ -37,35 +82,67 @@ export default function Chat() {
               <Message from={message.role === 'user' ? 'user' : 'assistant'} key={message.id}>
                 <MessageContent>
                   {message.parts
-                  .map((part) => {
-                    part.type === 'text' ? part.text : null
-                    })
-                  .join('')}
+                  .map((part) => part.type === 'text' ? part.text : null)
+                  }
                 </MessageContent>
-            </Message>
+              </Message>
             ))
           )}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
 
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          if (input.trim()) {
-            sendMessage({ text: input });
-            setInput('');
-          }
-        }}
-      >
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          disabled={status !== 'ready'}
-          placeholder="Say something..."
-          className='fixed bg-zinc-100 bottom-0 left-0 right-0 w-full max-w-md p-2 mb-8 mx-auto rounded-lg border border-zinc-300 shadow-xl'
-        />
-      </form>
+      <PromptInput onSubmit={handleSubmit} className="mt-4" globalDrop multiple>
+          <PromptInputBody>
+            <PromptInputAttachments>
+              {(attachment) => <PromptInputAttachment data={attachment} />}
+            </PromptInputAttachments>
+            <PromptInputTextarea
+              onChange={(e) => setText(e.target.value)}
+              ref={textareaRef}
+              value={text}
+            />
+          </PromptInputBody>
+          <PromptInputToolbar>
+            <PromptInputTools>
+              <PromptInputActionMenu>
+                <PromptInputActionMenuTrigger />
+                <PromptInputActionMenuContent>
+                  <PromptInputActionAddAttachments />
+                </PromptInputActionMenuContent>
+              </PromptInputActionMenu>
+              {/* <PromptInputSpeechButton
+                onTranscriptionChange={setText}
+                textareaRef={textareaRef}
+              /> */}
+              {/* <PromptInputButton
+                onClick={() => setUseWebSearch(!useWebSearch)}
+                variant={useWebSearch ? 'default' : 'ghost'}
+              >
+                <GlobeIcon size={16} />
+                <span>Search</span>
+              </PromptInputButton> */}
+              {/* <PromptInputModelSelect
+                onValueChange={(value) => {
+                  setModel(value);
+                }}
+                value={model}
+              >
+                <PromptInputModelSelectTrigger>
+                  <PromptInputModelSelectValue />
+                </PromptInputModelSelectTrigger>
+                <PromptInputModelSelectContent>
+                  {models.map((model) => (
+                    <PromptInputModelSelectItem key={model.id} value={model.id}>
+                      {model.name}
+                    </PromptInputModelSelectItem>
+                  ))}
+                </PromptInputModelSelectContent>
+              </PromptInputModelSelect> */}
+            </PromptInputTools>
+            <PromptInputSubmit disabled={!text && !status} status={status} />
+          </PromptInputToolbar>
+        </PromptInput>
     </div>
   );
 }

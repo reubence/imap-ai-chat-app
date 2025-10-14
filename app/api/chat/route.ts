@@ -3,12 +3,13 @@ import { openrouter } from '@openrouter/ai-sdk-provider';
 import { convertToModelMessages, generateId, streamText, UIMessage } from 'ai';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-const session = await auth.api.getSession(req);
+// const session = await auth.api.getSession(req);
   const { messages, chatId }: any = await req.json();
 
   const result = streamText({

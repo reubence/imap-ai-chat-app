@@ -1,31 +1,28 @@
-import { getSessionCookie } from "better-auth/cookies";
 import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
-const DEFAULT_LOGIN_REDIRECT = "/login";
-const authRoutes = ["/login", "/signup"];
+const DEFAULT_LOGIN_REDIRECT = "/";
+const authRoutes = ["/login", "/register"];
 const apiAuthPrefix = "/api/auth";
 
-export function middleware(req: NextRequest){
-    const { nextUrl } = req;
+export function middleware(req: NextRequest) {
+  const { nextUrl } = req;
+  const isLoggedIn = !!getSessionCookie(req);
 
-    const isLoggedIn = !!getSessionCookie(req);
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix)
 
-    const isAuthRoute = authRoutes.includes(nextUrl.pathname)
-    const isApiAuthRoute = apiAuthPrefix.includes(nextUrl.pathname)
+  if (isApiAuthRoute) return NextResponse.next();
 
-    if (isApiAuthRoute) return NextResponse.next();
+  if (isAuthRoute && isLoggedIn) {
+    return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+  } else if (!isAuthRoute && !isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", nextUrl));
+  }
 
-    if (isAuthRoute && isLoggedIn){
-        return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
-    } else if (!isAuthRoute && !isLoggedIn){
-        return NextResponse.redirect(new URL("/login", nextUrl))
-    }
-
-    return NextResponse.next();
-    
-};
+  return NextResponse.next();
+}
 
 export const config = {
-    matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
-  
