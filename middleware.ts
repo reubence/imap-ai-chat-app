@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 const DEFAULT_LOGIN_REDIRECT = "/";
-const authRoutes = ["/login", "/register"];
+const authRoutes = ["/login", "/signup"];
 const apiAuthPrefix = "/api/auth";
 
 export function middleware(req: NextRequest) {
