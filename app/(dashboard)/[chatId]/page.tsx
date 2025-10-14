@@ -3,6 +3,14 @@
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useState } from 'react';
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from '@/components/ai-elements/conversation';
+import { MessageSquare } from 'lucide-react';
+import { Message, MessageContent } from '@/components/ai-elements/message';
 
 export default function Chat() {
   const { messages, sendMessage, status } = useChat({
@@ -12,16 +20,34 @@ export default function Chat() {
   });
   const [input, setInput] = useState('');
 
+  console.log(messages);
+  
   return (
     <div className='flex flex-col w-full max-w-md py-24 mx-auto stretch'>
-      {messages.map(message => (
-        <div key={message.id} className='whitespace-pre-wrap'>
-          {message.role === 'user' ? 'User: ' : 'AI: '}
-          {message.parts.map((part, index) =>
-            part.type === 'text' ? <span key={index}>{part.text}</span> : null,
+      <Conversation className="relative w-full" style={{ height: '500px' }}>
+        <ConversationContent>
+          {messages.length === 0 ? (
+            <ConversationEmptyState
+              icon={<MessageSquare className="size-12" />}
+              title="No messages yet"
+              description="Start a conversation to see messages here"
+            />
+          ) : (
+            messages.map((message) => (
+              <Message from={message.role === 'user' ? 'user' : 'assistant'} key={message.id}>
+                <MessageContent>
+                  {message.parts
+                  .map((part) => {
+                    part.type === 'text' ? part.text : null
+                    })
+                  .join('')}
+                </MessageContent>
+            </Message>
+            ))
           )}
-        </div>
-      ))}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
       <form
         onSubmit={e => {

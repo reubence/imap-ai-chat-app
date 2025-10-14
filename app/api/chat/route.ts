@@ -15,9 +15,9 @@ const session = await auth.api.getSession(req);
     model: openrouter.chat('openai/gpt-oss-120b'),
     system: 'You are a helpful assistant.',
     messages: convertToModelMessages(messages),
-    async onFinish({ text }) {
-        return chatId;
-    }
+    // async onFinish({ text }) {
+    //     return chatId;
+    // }
   });
 
   return result.toUIMessageStreamResponse();
